@@ -1,6 +1,7 @@
-main: main.c
-	gcc -Wall -o main main.c
+all: geometry
+geometry: geometry.c
+	gcc -Wall -Werror -o geometry geometry.c
 run:
-	./main
+	./geometry geom.txt
 clean:
-	rm -rf *.o main
+	rm -rf *.o geometry

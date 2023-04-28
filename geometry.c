@@ -5,12 +5,10 @@
 int main()
 {
     FILE* file;
-    file = fopen("geom.txt", "r");
-
-    int i, ind_open_bracket = 0, ind_close_bracket = 0, ind_last_num_elm = 0,
-           ind_first_num_elm = 0, ind_second_num_elm = 0;
+    file = fopen("test.txt", "r");
+    int i, ind_open_bracket = 0, ind_close_bracket = 0, ind_last_num_elm = 0, ind_first_num_elm = 0, ind_second_num_elm = 0;
     int l = 0, c = 0, e = 0, error = 0;
-
+    int newflag=0;
     while (1) {
         e = fgetc(file);
         if (e == EOF) {
@@ -22,18 +20,15 @@ int main()
     }
     l = c;
     fclose(file);
-
     char a[l], b[6] = "circle";
-    file = fopen("geom.txt", "r");
+    file = fopen("test.txt", "r");
     while (fgets(a, l + 1, file)) {
         printf("%s", a);
-
         for (i = 0; i < 7; i++) {
             if (a[i] != b[i] && i < 6) {
-                printf("Error at column %d: expected 'circle'\n", i);
+                printf("\nError at column %d: expected 'circle'\n", i);
                 error = 1;
                 break;
-                ;
             }
             ind_open_bracket = i;
         }
@@ -45,44 +40,66 @@ int main()
                 ind_close_bracket = l - 1;
             }
         }
-
         for (i = ind_open_bracket + 1; a[i] != ' '; i++) {
             if (error == 0) {
                 if (a[i] == ',') {
                     error = 1;
-                    printf("Error at column %d: expected '<space>' and "
-                           "'<double>'\n",
-                           i);
+                    printf("\nError at column %d: expected '<space>' and " "'<double>'\n", i);
                     break;
                 }
                 if (isdigit(a[i]) == 0 && a[i] != '.') {
                     error = 1;
-                    printf("Error at column %d: expected '<double>'\n", i);
+                    printf("\nError at column %d: expected '<double>'\n", i);
                     break;
                 }
                 ind_first_num_elm = i;
             } else {
-                break;
+                  break;
             }
         }
-
+    
+        for(i=ind_first_num_elm+2;i<20;i++){
+            if(a[i]=='.' && isdigit(a[i+1]) == 0){
+                    if(newflag==0){
+                    newflag=1;
+                }else{
+                    printf("\nError at column %d",a[i]-32);
+                error=1;
+                printf("\n");
+                    break;
+                }
+                }
+            }
         for (i = ind_first_num_elm + 2; a[i] != ','; i++) {
             if (error == 0) {
                 if (a[i] == ')') {
                     error = 1;
-                    printf("Error at column %d: expected ',' and '<double>'\n",
-                           i);
+                    printf("\nError at column %d: expected ',' and '<double>'\n", i);
                     break;
                 }
                 if (isdigit(a[i]) == 0 && a[i] != '.') {
                     error = 1;
-                    printf("Error at column %d: expected '<double>'\n", i);
+                    printf("\nError at column %d: expected '<double>'\n", i);
                     break;
                 }
                 ind_second_num_elm = i;
             } else {
                 break;
             }
+        }
+
+        for (i = ind_open_bracket; i < ind_close_bracket-1; i++)
+        {
+            if (error == 0)
+            {
+                if (a[i] == '.' && isdigit(a[i+1]) == 0)
+                {
+                    error = 1;
+                    printf("\nError at column %d: expected '<double>'\n", i+1);
+                    break;
+                }
+            }
+            else break;
         }
 
         for (i = ind_second_num_elm + 3; i < ind_close_bracket; i++) {
@@ -92,7 +109,7 @@ int main()
                         break;
                     }
                     error = 1;
-                    printf("Error at column %d: expected '<double>'\n", i);
+                    printf("\nError at column %d: expected '<double>'\n", i);
                     break;
                 }
                 ind_last_num_elm = i;
@@ -100,12 +117,11 @@ int main()
                 break;
             }
         }
-
         for (i = ind_last_num_elm + 1; i < l; i++) {
             if (error == 0) {
                 if (a[i] != ')') {
                     error = 1;
-                    printf("Error at column %d: expected ')'\n", i);
+                    printf("\nError at column %d: expected ')'\n", i);
                     break;
                 } else {
                     ind_close_bracket = i;
@@ -115,27 +131,23 @@ int main()
                 break;
             }
         }
-
         for (i = ind_close_bracket + 1; i < l; i++) {
             if (error == 0) {
                 if (a[i] == '\n') {
                     break;
                 }
-
                 if (a[i] != ' ') {
                     error = 1;
-                    printf("Error at column %d: unexpected token\n", i);
+                    printf("\nError at column %d: unexpected token\n", i);
                     break;
                 }
             } else {
                 break;
             }
         }
-
         if (error == 0) {
-            printf("No Errors\n");
+            printf("\nNo Errors\n");
         }
-
         error = 0;
     }
     return 0;

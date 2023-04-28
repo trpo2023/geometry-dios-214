@@ -4,7 +4,5 @@ main
 # no temporary files
 *~
 *swp
-# no *.txt files
-*.txt
 # but track input.txt
 ! input.txt

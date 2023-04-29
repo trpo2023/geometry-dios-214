@@ -1,114 +1,71 @@
-#include "parser.h"
-#include <ctype.h>
-#include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#define pi 3.14
+#include <libgeometry/parser.h>
+#define M_PI 3.14
 
-#define N 100
-
-void handle_error(const char* error_msg, const char* input, int pos)
+float pcircle(float rad)
 {
-    fprintf(stderr, "%s\n", input);
-    for (int i = 0; i < pos; i++) {
-        fprintf(stderr, " ");
-    }
-    fprintf(stderr, "^\n");
-    fprintf(stderr, "Error at column %d: %s\n", pos, error_msg);
+    return 2 * M_PI * rad;
 }
 
-int check_circle( char* input)
+float acircle(float rad)
 {
-    double per;
-    double area;
-    const char* prefix = "circle(";
-    char* start_ptr = input;
-    int prefix_len = strlen(prefix);
-    if (strncmp(input, prefix, prefix_len)) {
-        handle_error("expected '('", start_ptr, 6);
-        return -1;
-    }
-    input += prefix_len;
-    char* end_ptr;
-    double x = strtod(input, &end_ptr);
-    if (end_ptr == input || *end_ptr != ' ') {
-        handle_error("expected '<double>'", start_ptr, end_ptr - start_ptr);
-        return -1;
-    }
-    input = end_ptr + 1;
-    double y = strtod(input, &end_ptr);
-    if (end_ptr == input || *end_ptr != ',') {
-        handle_error("expected ','", start_ptr, end_ptr - start_ptr);
-        return -1;
-    }
-    input = end_ptr + 1;
-    double radius = strtod(input, &end_ptr);
-    if (end_ptr == input || *end_ptr != ')') {
-        handle_error("expected ')'", start_ptr, end_ptr - start_ptr);
-        return -1;
-    }
-    end_ptr += 1;
-    if (*end_ptr != '\0') {
-        handle_error("unexpected token", start_ptr, end_ptr - start_ptr);
-        return -1;
-    }
-    printf("circle(%.1f %.1f, %.1f)\n", x, y, radius);
-
-    const char* output_f = "OutputGeometry.txt";
-    FILE* file = fopen(output_f, "w");
-    if (file == NULL) {
-        printf("Error: can't create output file:\n");
-        printf("%s\n", output_f);
-        return -1;
-    }
-    fprintf(file, "circle(%.1f %.1f, %.1f)\n", x, y, radius);
-    area = pi * pow(radius, 2);
-    per = 2 * pi * radius;
-
-    fprintf(file, "perimetr=%.1f\n area %1.f", per, area);
-    //printf("perimetr= %1.f\n", per);
-    //printf("area = %1.f\n", area);
-
-    fclose(file);
-    return 0;
+    return M_PI * rad * rad;
 }
 
-int check_input(const char* input)
+void Exception(char* string)
 {
-    if (strncmp(input, "circle", 6) == 0) {
-        return check_circle((char*)input);
+    int length = strlen(string);
+    char* end;
+    char* start;
+    for (int i = 0; i < length; i++) {
+        if (string[i] == ')') {
+            end = &string[i];
+        }
+        if (string[i] == '(') {
+            start = &string[i];
+        }
     }
-    handle_error("expected 'circle'", input, 0);
-    return -1;
+    if (end == NULL) {
+        printf("Error at column %d: expected ')' \n", length - 1);
+        exit(EXIT_FAILURE);
+    }
+
+    for (int i = 0; i < strlen(end); i++) {
+        if (!(end[i + 1] == ' ' || end[i + 1] == '\000')) {
+            printf("Error at column %d: unexpected token\n", length);
+            exit(EXIT_FAILURE);
+        }
+    }
+
+    for (int i = 0; i < end - start; i++) {
+        if (!(start[i + 1] == ' ' || start[i + 1] == ',' || start[i + 1] == '.'
+              || start[i + 1] == ')'
+              || ((int)start[i + 1] >= (int)'0'
+                  && (int)start[i + 1] <= (int)'9'))) {
+            printf("Error at column %d: expected '<double>'\n", i + 1);
+            exit(EXIT_FAILURE);
+        }
+    }
 }
-
-int area_check(char* input)
+void parse_start()
 {
-    //int area;
-    const char* prefix = "circle(";
-    int prefix_len = strlen(prefix);
-    input += prefix_len;
-    char* end_ptr;
-    //double x = strtod(input, &end_ptr);
-    //input = end_ptr + 1;
-    //double y = strtod(input, &end_ptr);
-    //input = end_ptr + 1;
-    double radius = strtod(input + 2, &end_ptr);
-    //area = pi * pow(radius, 2);
-    return radius;
+    char string[64];
+    do {
+        gets(string);
+        if ((strstr(string, "circle(") != NULL)) {
+            point a;
+            double rad = 0;
+            Exception(string);
+            sscanf(string, "circle(%lf %lf, %lf)", &a.x, &a.y, &rad);
 
-
-}
-
-int area(int x)
-{
-   int area = pi * pow(x, 2);
-   return area;
-}
-
-int per(int x)
-{
-    int peri = 2 * pi * x;
-    return peri;
+            if (rad < 0) {
+                puts("Radius cannot be negative\n");
+            }
+            printf("Perimetr: %.3f, Area: %.3f\n", pcircle(rad), acircle(rad));
+        } else {
+            if (strcmp(string, "q")) {
+                printf("Error at column 0: expected 'circle', 'triangle' or "
+                       "'polygon' \n");
+            }
+        }
+    } while (strcmp(string, "q"));
 }

@@ -1,12 +1,14 @@
 #pragma once
-#ifndef PARSER_H
-#define PARSER_H
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+typedef struct Point {
+    double x;
+    double y;
+} point;
 
-
-int area_check(char* input);
-int check_input(const char* input);
-int check_circle(char* input);
-void handle_error(const char* error_msg, const char* input, int pos);
-int area(int x);
-
-#endif
+float pcircle(float rad);
+float acircle(float rad);
+void Exception(char* string);
+void parse_start();
